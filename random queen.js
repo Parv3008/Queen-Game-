@@ -130,9 +130,9 @@ function pickRandomCell(availableCells) {
 function getNearColor(regions, row, col, n) {
     let nearColor = new Set();
     let directions = [[1,0], [-1,0], [0,-1], [0,1]];    //this is the direction to check the near cells
-    for (let [dx, dy] of directions) {
-        let newRow = row + dx;
-        let newCol = col + dy;
+    for (let [x, y] of directions) {
+        let newRow = row + x;
+        let newCol = col + y;
         if (newRow >= 0 && newRow < n && newCol >= 0 && newCol < n && regions[newRow][newCol]) {
             nearColor.add(regions[newRow][newCol]);     //store the color of near cells
         }
