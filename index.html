@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👑Queen Game👑</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="marquee">
+        <div class="infinite">
+            <div class="content">&nbsp;👑Queen Game👑Queen Game👑Queen Game👑Queen Game👑Queen Game👑Queen Game👑Queen
+                Game👑Queen Game👑Queen Game👑Queen Game👑</div>
+        </div>
+    </div>
+    <hr>
+    <p> Game Rules:</p>
+    <ol class="rules">
+        <li>Place the queens on the board such that no two queens attack each other.</li>
+        <li>Queen cannot be in the same row as another queen.</li>
+        <li>Queen cannot be in the same column as another queen.</li>
+        <li>Queen cannot be in the same diagonal as another queen.</li>
+        <li>Queen must be placed in a different colored region (each region can contain at most one queen).</li>
+    </ol>
+    <label for="gridSize">Enter Board Size (e.g., 5 for 5x5):</label>
+    <input type="number" id="gridSize" min="4" max="10" placeholder="4-10" required>
+    <button onclick="startGame()">Start Game</button>
+    <div class="grid-container" id="grid"></div>
+    <div id="message">
+
+    </div>
+
+    <script src="random queen.js"></script>
+</body>
+
+</html>
