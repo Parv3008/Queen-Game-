@@ -27,13 +27,13 @@ function generateGrid(gridSize, regions) {
                 cell.style.backgroundColor = regions[row][col];
             }
 
-            cell.addEventListener("click", function toggleQueen(event) {
+            cell.addEventListener("click", function isQueen(event) {
                 const cell = event.target;
                 const row = parseInt(cell.dataset.row);
                 const col = parseInt(cell.dataset.col);
                 const regionColor = regions[row][col];
 
-                // cell.addEventListener("click", function toggleQueen(event) {
+                // cell.addEventListener("click", function isQueen(event) {
                 //     const cell = event.target;
                 //     if (cell.textContent === "👑") {
                 //         cell.textContent = "";
@@ -70,7 +70,7 @@ function generateGrid(gridSize, regions) {
                         
                     }, 500);
                 }
-                
+
                 if (queenInGrid.size === gridSize) {
                     message.textContent = "🎉 Congratulations! All queens are placed correctly 🎉";
                     message.style.color = "green";
