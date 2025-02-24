@@ -6,6 +6,7 @@ function startGame() {
     let regions = QueenColor(board, gridSize);
     regions = fillRegions(regions, board, gridSize);
     generateGrid(gridSize, regions);
+    document.getElementById("message").textContent = "";
 }
 
 function generateGrid(gridSize, regions) {
@@ -46,6 +47,7 @@ function generateGrid(gridSize, regions) {
                     cell.textContent = "";
                     queenInGrid.delete(`${row},${col}`);
                     queenInRegions.delete(regionColor); 
+                    document.getElementById("message").textContent = "";
                     return;
                 }
 
@@ -74,9 +76,7 @@ function generateGrid(gridSize, regions) {
                 if (queenInGrid.size === gridSize) {
                     message.textContent = "🎉 Congratulations! All queens are placed correctly 🎉";
                     message.style.color = "green";
-                    setTimeout(() => {
-                        message.innerHTML = ""
-                    },10000);
+
                 }
             });
 
