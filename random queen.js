@@ -1,21 +1,21 @@
 function startGame() {
     let gridSize = parseInt(document.getElementById("gridSize").value);
-    const solution = randomQueen(gridSize);
+    const solution = generateQueens(gridSize);
     const board = solution.map(row => row.split(''));
     console.log(solution);
-    let regions = QueenColor(board, gridSize);
-    regions = fillRegions(regions, board, gridSize);
-    generateGrid(gridSize, regions);
+    let regions = assignQueenColors(board, gridSize);
+    regions = fillBoardRegions(regions, board, gridSize);
+    createGrid(gridSize, regions);
     document.getElementById("message").textContent = "";
 }
 
-function generateGrid(gridSize, regions) {
+function createGrid(gridSize, regions) {
     const gridContainer = document.getElementById("grid");
     gridContainer.innerHTML = "";
     gridContainer.style.gridTemplateColumns = `repeat(${gridSize}, 50px)`;
     gridContainer.style.gridTemplateRows = `repeat(${gridSize}, 50px)`;
-    let queenInGrid = new Map();
-    let queenInRegions = new Map(); 
+    let queenPositions = new Map();
+    let regionQueens = new Map(); 
 
     for (let row = 0; row < gridSize; row++) {
         for (let col = 0; col < gridSize; col++) {
@@ -28,30 +28,21 @@ function generateGrid(gridSize, regions) {
                 cell.style.backgroundColor = regions[row][col];
             }
 
-            cell.addEventListener("click", function isQueen(event) {
+            cell.addEventListener("click", function handleQueenClick(event) {
                 const cell = event.target;
                 const row = parseInt(cell.dataset.row);
                 const col = parseInt(cell.dataset.col);
                 const regionColor = regions[row][col];
 
-                // cell.addEventListener("click", function isQueen(event) {
-                //     const cell = event.target;
-                //     if (cell.textContent === "👑") {
-                //         cell.textContent = "";
-                //     } else {
-                //         cell.textContent = "👑";
-                //     }
-                // });
-
                 if (cell.textContent === "👑") {
                     cell.textContent = "";
-                    queenInGrid.delete(`${row},${col}`);
-                    queenInRegions.delete(regionColor); 
+                    queenPositions.delete(`${row},${col}`);
+                    regionQueens.delete(regionColor); 
                     document.getElementById("message").textContent = "";
                     return;
                 }
 
-                if (queenInRegions.has(regionColor)) {
+                if (regionQueens.has(regionColor)) {
                     let originalColor = cell.style.backgroundColor;
                     cell.style.backgroundColor = "red";
                     setTimeout(() => {
@@ -60,23 +51,21 @@ function generateGrid(gridSize, regions) {
                     return;
                 }
 
-                if (isSafe(queenInGrid, row, col, gridSize, regions)) {
+                if (isSafe(queenPositions, row, col, gridSize)) {
                     cell.textContent = "👑";
-                    queenInGrid.set(`${row},${col}`, 'Q');
-                    queenInRegions.set(regionColor, { row, col });          
+                    queenPositions.set(`${row},${col}`, 'Q');
+                    regionQueens.set(regionColor, { row, col });          
                 } else {
                     let originalColor = cell.style.backgroundColor;
                     cell.style.backgroundColor = "red";
                     setTimeout(() => {
                         cell.style.backgroundColor = originalColor;
-                        
                     }, 500);
                 }
 
-                if (queenInGrid.size === gridSize) {
-                    message.textContent = "🎉 Congratulations! All queens are placed correctly 🎉";
+                if (queenPositions.size === gridSize) {
+                    message.textContent = "🎉 Awesome! You placed all the queens correctly! 🎉";
                     message.style.color = "green";
-
                 }
             });
 
@@ -87,22 +76,20 @@ function generateGrid(gridSize, regions) {
 
 //this function check if queen is place in safe position
 //it will check condotion for horizontally, vertically, left diagonal and right diagonal
-function isSafe(map, row, col, n) {
-    // Check row and column
+function isSafe(queenPositions, row, col, n) {
     for (let j = 0; j < n; j++) {
-        if (map.get(`${row},${j}`) === 'Q') return false;
+        if (queenPositions.get(`${row},${j}`) === 'Q') return false;
     }
     for (let i = 0; i < n; i++) {
-        if (map.get(`${i},${col}`) === 'Q') return false;
+        if (queenPositions.get(`${i},${col}`) === 'Q') return false;
     }
 
-    // Check only the closest diagonal queens not whole diagonal
     let directions = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
     for (let [dx, dy] of directions) {
         let newRow = row + dx;
         let newCol = col + dy;
         if (newRow >= 0 && newRow < n && newCol >= 0 && newCol < n) {
-            if (map.get(`${newRow},${newCol}`) === 'Q') return false;
+            if (queenPositions.get(`${newRow},${newCol}`) === 'Q') return false;
         }
     }
 
@@ -110,27 +97,27 @@ function isSafe(map, row, col, n) {
 }
 
 //this function tries to place queens while checking if the position is safe or not 
-function placeQueen(map, n) {
-    let availableCols = new Set([...Array(n).keys()]);           //so i used set to store the available columns
+function tryPlacingQueens(queenPositions, n) {
+    let availableCols = new Set([...Array(n).keys()]);
     for (let row = 0; row < n; row++) {
         let cols = Array.from(availableCols);
         if (cols.length === 0) return false;
-        let col = cols[Math.floor(Math.random() * cols.length)];     //pick  a random column for place queen
-        if (!isSafe(map, row, col, n)) return false;
-        map.set(`${row},${col}`, 'Q');
-        availableCols.delete(col);              // here i delete the column which is used 
+        let col = cols[Math.floor(Math.random() * cols.length)];        //pick  a random column for place queen
+        if (!isSafe(queenPositions, row, col, n)) return false;
+        queenPositions.set(`${row},${col}`, 'Q');
+        availableCols.delete(col);      // here i delete the column which is used 
     }
     return true;
 }
 
 //this function generate random solution
-function randomQueen(n) {
-    let map = new Map();
-    while (!placeQueen(map, n)) {           //this is keep trying until we get the solution
-        map = new Map();
+function generateQueens(n) {
+    let queenPositions = new Map();
+    while (!tryPlacingQueens(queenPositions, n)) {
+        queenPositions = new Map();
     }
     let board = Array.from({ length: n }, () => Array(n).fill('-'));
-    for (let [key, value] of map.entries()) {
+    for (let [key, value] of queenPositions.entries()) {
         if (value === 'Q') {
             let [row, col] = key.split(',').map(Number);
             board[row][col] = 'Q';
@@ -140,7 +127,7 @@ function randomQueen(n) {
 }
 
 //this function assign a color to each queen 
-function QueenColor(board, n) {
+function assignQueenColors(board, n) {
     let regions = Array.from({ length: n }, () => Array(n).fill(null));
     let colors = ['green', 'blue', 'yellow', 'purple', 'orange', 'pink', 'brown', 'gray', 'cyan', 'magenta'];
     let colorIndex = 0;
@@ -148,67 +135,67 @@ function QueenColor(board, n) {
     for (let row = 0; row < n; row++) {
         for (let col = 0; col < n; col++) {
             if (board[row][col] === 'Q') {
-                regions[row][col] = colors[colorIndex % colors.length];         //assign color to queen
+                regions[row][col] = colors[colorIndex % colors.length];
                 colorIndex++;
             }
         }
     }
-    return  regions ;
+    return regions;
 }
 
 //after assigning color to queen, now we want available cells to fill the remaining cells
 //this function will return the available cells
-function AvailableCells(regions, n) {
-    let availableCells = [];
+function findEmptyCells(regions, n) {
+    let emptyCells = [];
     for (let row = 0; row < n; row++) {
         for (let col = 0; col < n; col++) {
             if (!regions[row][col]) {
-                availableCells.push({ row, col });          //store empty cell position
+                emptyCells.push({ row, col });
             }
         }
     }
-    return availableCells;
+    return emptyCells;
 }
 
 //this function will pick a random cell from available cells
-function pickRandomCell(availableCells) {
-    let randomIndex = Math.floor(Math.random() * availableCells.length);
-    return availableCells.splice(randomIndex, 1)[0];            //this will remove the cell from available cells and return the selected cell
+function selectRandomCell(emptyCells) {
+    let randomIndex = Math.floor(Math.random() * emptyCells.length);
+    return emptyCells.splice(randomIndex, 1)[0];        //this will remove the cell from available cells and return the selected cell
 }
 
 //this function will get the color of the near cells
-function getNearColor(regions, row, col, n) {
-    let nearColor = new Set();
-    let directions = [[1, 0], [-1, 0], [0, -1], [0, 1]];    //this is the direction to check the near cells
+function getNearbyColors(regions, row, col, n) {
+    let nearbyColors = new Set();
+    let directions = [[1, 0], [-1, 0], [0, -1], [0, 1]];
     for (let [x, y] of directions) {
         let newRow = row + x;
         let newCol = col + y;
         if (newRow >= 0 && newRow < n && newCol >= 0 && newCol < n && regions[newRow][newCol]) {
-            nearColor.add(regions[newRow][newCol]);         //store the color of near cells
+            nearbyColors.add(regions[newRow][newCol]);
         }
     }
-    return nearColor;
+    return nearbyColors;
 }
 
 //this function will assign color to the cell
-function assignColor(regions, row, col, nearColor) {
-    if (nearColor.size > 0) {
-        let colors = Array.from(nearColor);
-        regions[row][col] = colors[Math.floor(Math.random() * colors.length)];      // Pick a random color from near cell
+function assignCellColor(regions, row, col, nearbyColors) {
+    if (nearbyColors.size > 0) {
+        let colors = Array.from(nearbyColors);
+        regions[row][col] = colors[Math.floor(Math.random() * colors.length)];
     }
 }
 
 //this function will fill the remaining cells with color
-function fillRegions(regions, board, n) {
-    let availableCells = AvailableCells(regions, n);
-    while (availableCells.length > 0) {         //this will keep filling the cells until all cells are filled
-        let cell = pickRandomCell(availableCells);
-        let nearColor = getNearColor(regions, cell.row, cell.col, n);
-        if (nearColor.size === 0) {
-            availableCells.push(cell);
+function fillBoardRegions(regions, board, n) {
+    let emptyCells = findEmptyCells(regions, n);
+    while (emptyCells.length > 0) {
+        let cell = selectRandomCell(emptyCells);
+        let nearbyColors = getNearbyColors(regions, cell.row, cell.col, n);
+        if (nearbyColors.size === 0) {
+            emptyCells.push(cell);
             continue;
         }
-        assignColor(regions, cell.row, cell.col, nearColor);
+        assignCellColor(regions, cell.row, cell.col, nearbyColors);
     }
 
 //this will clear the queen from the board bez we want to place the queen otherwise it will show the queen on the board
@@ -221,5 +208,4 @@ function fillRegions(regions, board, n) {
     }
 
     return regions;
-
 }
